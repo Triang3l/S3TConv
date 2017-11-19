@@ -79,7 +79,7 @@ void S3TConv_DXT1_PunchthroughToExplicitAlpha(const uint8_t rgbBlock[8], uint8_t
 
 void S3TConv_DXT1_PunchthroughToInterpolatedAlpha(const uint8_t rgbBlock[8], uint8_t alphaBlock[8]) {
 	uint32_t blackIndexBits;
-	uint32_t alphaCodes;
+	uint32_t alphaCodesLow, alphaCodesHigh;
 	unsigned int pixelIndex;
 
 	if (((uint16_t) rgbBlock[0] | ((uint16_t) rgbBlock[1] << 8)) >
@@ -93,22 +93,19 @@ void S3TConv_DXT1_PunchthroughToInterpolatedAlpha(const uint8_t rgbBlock[8], uin
 	blackIndexBits = (uint32_t) rgbBlock[4] | ((uint32_t) rgbBlock[5] << 8) |
 			((uint32_t) rgbBlock[6] << 16) | ((uint32_t) rgbBlock[7] << 24);
 	blackIndexBits = blackIndexBits & 0x55555555 & ((blackIndexBits & 0xAAAAAAAA) >> 1);
+	alphaCodesLow = alphaCodesHigh = 0;
+	for (pixelIndex = 0; pixelIndex < 8; ++pixelIndex) {
+		unsigned int alphaCodeShift = pixelIndex * 3;
+		alphaCodesLow |= ((blackIndexBits >> (pixelIndex << 1)) & 1) << alphaCodeShift;
+		alphaCodesHigh |= ((blackIndexBits >> (16 + (pixelIndex << 1))) & 1) << alphaCodeShift;
+	}
 
 	alphaBlock[0] = 0xFF;
 	alphaBlock[1] = 0;
-	alphaCodes = 0;
-	for (pixelIndex = 0; pixelIndex < 8; ++pixelIndex) {
-		alphaCodes |= ((blackIndexBits >> (pixelIndex << 1)) & 1) << (pixelIndex * 3);
-	}
-	alphaBlock[2] = (uint8_t) alphaCodes;
-	alphaBlock[3] = (uint8_t) (alphaCodes >> 8);
-	alphaBlock[4] = (uint8_t) (alphaCodes >> 16);
-	blackIndexBits >>= 16;
-	alphaCodes = 0;
-	for (pixelIndex = 0; pixelIndex < 8; ++pixelIndex) {
-		alphaCodes |= ((blackIndexBits >> (pixelIndex << 1)) & 1) << (pixelIndex * 3);
-	}
-	alphaBlock[5] = (uint8_t) alphaCodes;
-	alphaBlock[6] = (uint8_t) (alphaCodes >> 8);
-	alphaBlock[7] = (uint8_t) (alphaCodes >> 16);
+	alphaBlock[2] = (uint8_t) alphaCodesLow;
+	alphaBlock[3] = (uint8_t) (alphaCodesLow >> 8);
+	alphaBlock[4] = (uint8_t) (alphaCodesLow >> 16);
+	alphaBlock[5] = (uint8_t) alphaCodesHigh;
+	alphaBlock[6] = (uint8_t) (alphaCodesHigh >> 8);
+	alphaBlock[7] = (uint8_t) (alphaCodesHigh >> 16);
 }
