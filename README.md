@@ -9,7 +9,7 @@ The ATITC conversion method is inspired by "[A Method for Load-Time Conversion o
 
 As various S3TC compressors provide generally better results than the ATITC encoder in Compressonator, S3TConv can also be used offline to prepare compressed textures for Adreno, in some cases creating images more accurate than Compressonator.
 
-![Conversion demo](https://github.com/Triang3l/S3TConv/blob/master/demo.png)
+![Conversion demo](/demo.png?raw=true)
 
 Usage
 -----
